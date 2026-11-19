@@ -187,20 +187,28 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : (data.value ?? '');
+    /**
+     * There will ALWAYS be an option because we use the options to create the form data.
+     */
+    const fieldOptions = options.find((filter) => filter.name === data.name)!;
+    const isBooleanField = (fieldOptions.mainField?.type ?? fieldOptions.type) === 'boolean';
 
-    if (!value) {
+    /**
+     * A boolean toggle that was never touched has no value, which the toggle displays as unchecked,
+     * so it must be submitted as `false` rather than being treated as an empty value.
+     */
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter)
+      ? 'true'
+      : (data.value ?? (isBooleanField ? 'false' : ''));
+
+    // `false` is a legitimate value, so only empty strings and nullish values are rejected.
+    if (value === '' || value === null || value === undefined) {
       return;
     }
 
     if (onChange) {
       onChange(data);
     }
-
-    /**
-     * There will ALWAYS be an option because we use the options to create the form data.
-     */
-    const fieldOptions = options.find((filter) => filter.name === data.name)!;
 
     /**
      * If the filter is a relation, we need to nest the filter object,

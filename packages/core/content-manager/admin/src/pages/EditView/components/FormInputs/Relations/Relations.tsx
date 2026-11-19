@@ -625,6 +625,9 @@ const RelationsInput = ({
        *
        */
       onChange(relation);
+      // The search term that produced the selection is stale now: clear it so that reopening the
+      // dropdown lists the remaining entries instead of the filtered-to-the-selection results.
+      setSearchParams((s) => ({ ...s, _q: '', page: 1 }));
     },
     [data, formatMessage, onChange, toggleNotification]
   );
